@@ -2,8 +2,10 @@
 import { Request, Response } from "express";
 
 import { StudentModel} from "../db/student.ts";
+import { Student } from "../types.ts";
+import { getStudentFromModel } from "../controllers/getStudentFromModel.ts";
 
-export const deleteStudent = async (req: Request<{id:string}>, res: Response<string| { error: unknown }>) => {
+export const deleteStudent = async (req: Request<{id:string}>, res: Response<Student| { error: unknown }>) => {
     try{
         const id = req.params.id;
 
@@ -14,7 +16,9 @@ export const deleteStudent = async (req: Request<{id:string}>, res: Response<str
             return;
         }
 
-        res.status(200).send("Student deleted");
+        const studentResponse:Student = await getStudentFromModel(student);
+
+        res.status(200).json(studentResponse).send(); //Devuelvo el estudiante borrado para los tests de Deno
     }catch(error){
         res.status(500).send(error.message);
     }

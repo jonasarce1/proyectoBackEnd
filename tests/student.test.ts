@@ -6,7 +6,7 @@ Deno.test({
     async fn() {
         const student = {
             name: "Test1",
-            email: "emailfalso@mail.com"
+            email: "emailfalso1@mail.com"
         }
         const response = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
@@ -44,7 +44,7 @@ Deno.test({
     async fn() {
         const student = {
             name: "Test2",
-            email: "emailfalso@mail.com"
+            email: "emailfalso2@mail.com"
         }
         const response = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
@@ -70,7 +70,7 @@ Deno.test({
     async fn() {
         const student = {
             name: "Test3",
-            email: "emailfalso@mail.com"
+            email: "emailfalso3@mail.com"
         }
         const response = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
@@ -106,7 +106,7 @@ Deno.test({
     async fn() {
         const student = {
             name: "Test5",
-            email: "emailfalso@mail.com"
+            email: "emailfalso4@mail.com"
         }
         const response = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
