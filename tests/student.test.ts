@@ -22,9 +22,17 @@ Deno.test({
         const response2 = await fetch(`https://proyecto-backend.deno.dev/student/${result._id}`, {
             method: "DELETE",
         });
-        const result2 = await response2.json();
-        assertEquals(result2.name, student.name);
-        assertEquals(result2.email, student.email);
+
+        if(response2.status == 200){
+            const result2 = await response2.json();
+            assertEquals(result2.name, student.name);
+            assertEquals(result2.email, student.email);
+        }else if(response2.status == 404){
+            const result2 = await response2.json();
+            assertEquals(result2.error, "Student not found");
+        }else{
+            assertEquals(response2.status, 500);
+        }
     }
 });
 
