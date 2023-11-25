@@ -15,7 +15,7 @@ Deno.test({
             name: "Test",
             email: "hola@hola.com"
         }
-        const response = await fetch("https://deno-deploy-test-2.deno.dev/students", {
+        const response = await fetch("https://proyecto-backend.deno.dev/students", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
