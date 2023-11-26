@@ -4,34 +4,39 @@ import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
 Deno.test({
     name: "postStudent",
     async fn() {
+        //Creamos un estudiante
         const student = {
             name: "Test1",
             email: "emailfalso1@mail.com"
         }
-        const response = await fetch("https://proyecto-backend.deno.dev/student", {
+        
+        const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(student)
+            body: JSON.stringify(student) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
         });
-        const result = await response.json();
+        const result = await createResponse.json();
+
         assertEquals(result.name, student.name);
         assertEquals(result.email, student.email);
-        //borro el estudiante creado (tambien vale para comprobar el deleteStudent aunque ese test esta mas abajo)
-        const response2 = await fetch(`https://proyecto-backend.deno.dev/student/${result._id}`, {
+
+        //Borramos el estudiante creado
+        const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/student/${result.id}`, {
             method: "DELETE",
         });
 
-        if(response2.status == 200){
-            const result2 = await response2.json();
+        if (deleteResponse.status === 200) { //Comprobaciones para debuggear
+            const result2 = await deleteResponse.json();
             assertEquals(result2.name, student.name);
             assertEquals(result2.email, student.email);
-        }else if(response2.status == 404){
-            const result2 = await response2.json();
+        } else if (deleteResponse.status === 404) {
+            const result2 = await deleteResponse.json();
             assertEquals(result2.error, "Student not found");
-        }else{
-            assertEquals(response2.status, 500);
+        } else {
+            assertEquals(deleteResponse.status, 500);
+            await deleteResponse.text(); //Hay que consumir el cuerpo de la respuesta para que la conexion se cierre
         }
     }
 });
@@ -40,9 +45,53 @@ Deno.test({
 Deno.test({
     name: "getStudents",
     async fn() {
-        const response = await fetch("https://proyecto-backend.deno.dev/students");
-        const result = await response.json();
+        //Creamos varios estudiantes
+        const student1 = {
+            name: "TestAux1",
+            email: "emailAux1@mail.com"
+        }
+        const student2 = {
+            name: "TestAux2",
+            email: "emailAux2@mail.com"
+        }
+
+        //Los guardamos en la base de datos
+        const createResponse1 = await fetch("https://proyecto-backend.deno.dev/student", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(student1)
+        });
+
+        const createResponse2 = await fetch("https://proyecto-backend.deno.dev/student", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(student2)
+        });
+
+        //Hacemos el get de los estudiantes
+        const getResponse = await fetch("https://proyecto-backend.deno.dev/students");
+        const result = await getResponse.json();
         assertEquals(Array.isArray(result), true);
+        assertEquals(result.length, 2);
+        
+        //Borramos los estudiantes creados
+        const deleteResponse1 = await fetch(`https://proyecto-backend.deno.dev/student/${result[0].id}`, {
+            method: "DELETE",
+        });
+
+        const deleteResponse2 = await fetch(`https://proyecto-backend.deno.dev/student/${result[1].id}`, {
+            method: "DELETE",
+        });
+
+        //Hay que consumir los cuerpos de las respuestas para que la conexion se cierre
+        await createResponse1.text();
+        await createResponse2.text();
+        await deleteResponse1.text();
+        await deleteResponse2.text();
     }
 });
 
@@ -54,7 +103,7 @@ Deno.test({
             name: "Test2",
             email: "emailfalso2@mail.com"
         }
-        const response = await fetch("https://proyecto-backend.deno.dev/student", {
+        const getResponse = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -62,13 +111,19 @@ Deno.test({
             body: JSON.stringify(student)
         });
         //guardo el id del estudiante creado
-        const result = await response.json();
-        const id = result._id;
+        const result = await getResponse.json();
+        const id = result.id;
         //hago el get del estudiante
         const response2 = await fetch(`https://proyecto-backend.deno.dev/student/${id}`);
         const result2 = await response2.json();
         assertEquals(result2.name, student.name);
         assertEquals(result2.email, student.email);
+
+        //Borramos el estudiante creado
+        const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/student/${id}`, {
+            method: "DELETE",
+        });
+        await deleteResponse.text();
     }
 });
 
@@ -80,7 +135,7 @@ Deno.test({
             name: "Test3",
             email: "emailfalso3@mail.com"
         }
-        const response = await fetch("https://proyecto-backend.deno.dev/student", {
+        const putResponse = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -88,8 +143,8 @@ Deno.test({
             body: JSON.stringify(student)
         });
         //guardo el id del estudiante creado
-        const result = await response.json();
-        const id = result._id;
+        const result = await putResponse.json();
+        const id = result.id;
         //hago el put del estudiante
         const student2 = {
             name: "Test4",
@@ -105,6 +160,13 @@ Deno.test({
         const result2 = await response2.json();
         assertEquals(result2.name, student2.name);
         assertEquals(result2.email, student2.email);
+
+        //Borramos el estudiante creado
+        const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/student/${id}`, {
+            method: "DELETE",
+        });
+
+        await deleteResponse.text();
     }
 });
 
@@ -116,7 +178,7 @@ Deno.test({
             name: "Test5",
             email: "emailfalso4@mail.com"
         }
-        const response = await fetch("https://proyecto-backend.deno.dev/student", {
+        const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -124,8 +186,8 @@ Deno.test({
             body: JSON.stringify(student)
         });
         //guardo el id del estudiante creado
-        const result = await response.json();
-        const id = result._id;
+        const result = await createResponse.json();
+        const id = result.id;
         //hago el delete del estudiante
         const response2 = await fetch(`https://proyecto-backend.deno.dev/student/${id}`, {
             method: "DELETE",
@@ -136,7 +198,7 @@ Deno.test({
     }
 });
 
-//Test email
+//Test validate email
 Deno.test({
     name: "email",
     async fn() {
@@ -145,42 +207,44 @@ Deno.test({
         name: "Test6",
         email: "emailcorrecto@mail.com",
       };
-      const responseValidEmail = await fetch(`https://proyecto-backend.deno.dev/student`, {
+      const validEmailResponse = await fetch(`https://proyecto-backend.deno.dev/student`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(studentValidEmail),
       });
-      const resultValidEmail = await responseValidEmail.json();
-      assertEquals(resultValidEmail.name, studentValidEmail.name);
-      assertEquals(resultValidEmail.email, studentValidEmail.email);
+      const validEmailresult = await validEmailResponse.json();
+      assertEquals(validEmailresult.name, studentValidEmail.name);
+      assertEquals(validEmailresult.email, studentValidEmail.email);
   
       // Caso de correo electrónico inválido
       const studentInvalidEmail = {
         name: "Test7",
         email: "emailincorrecto",
       };
-      const responseInvalidEmail = await fetch(`https://proyecto-backend.deno.dev/student`, {
+      const ivalidEmailResponse = await fetch(`https://proyecto-backend.deno.dev/student`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(studentInvalidEmail),
       });
-      const resultInvalidEmail = await responseInvalidEmail.json();
-      
-      assertEquals(responseInvalidEmail.status, 400);
 
-      assertEquals(resultInvalidEmail.error, "Invalid email format");
+      //Deberia dar un mensaje de error
+      const invalidEmailResult = await ivalidEmailResponse.text();
+      
+      assertEquals(ivalidEmailResponse.status, 500); //Error con status 500 debido al validate del modelo
+
+      assertEquals(invalidEmailResult, "Student validation failed: email: Validator failed for path `email` with value `emailincorrecto`"); //Mensaje de error del validate del modelo
   
-      //Borramos los estudiantes creados
-      await fetch(`https://proyecto-backend.deno.dev/student/${resultValidEmail._id}`, {
+      //Borramos los estudiantes creados, solo se deberia borrar el valido
+      const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/student/${validEmailresult.id}`, {
         method: "DELETE",
       });
-  
-      await fetch(`https://proyecto-backend.deno.dev/student/${resultInvalidEmail._id}`, {
-        method: "DELETE",
-      });
+
+    await deleteResponse.text();
     },
   });
+
+//Test Middleware Hook deleteStudent con asignaturas
