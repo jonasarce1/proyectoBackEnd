@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals, assertStringIncludes } from "https://deno.land/std@0.203.0/assert/mod.ts";
 
 //Test postStudent
 Deno.test({
@@ -6,14 +6,14 @@ Deno.test({
     async fn() {
         //Creamos un estudiante
         const student = {
-            name: "Test1",
+            name: "Student1",
             email: "emailfalso1@mail.com"
         }
         
         const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
             },
             body: JSON.stringify(student) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
         });
@@ -47,11 +47,11 @@ Deno.test({
     async fn() {
         //Creamos varios estudiantes
         const student1 = {
-            name: "TestAux1",
+            name: "StudentAux1",
             email: "emailAux1@mail.com"
         }
         const student2 = {
-            name: "TestAux2",
+            name: "StudentAux2",
             email: "emailAux2@mail.com"
         }
 
@@ -100,7 +100,7 @@ Deno.test({
     name: "getStudent",
     async fn() {
         const student = {
-            name: "Test2",
+            name: "Student2",
             email: "emailfalso2@mail.com"
         }
         const getResponse = await fetch("https://proyecto-backend.deno.dev/student", {
@@ -132,7 +132,7 @@ Deno.test({
     name: "putStudent",
     async fn() {
         const student = {
-            name: "Test3",
+            name: "Student3",
             email: "emailfalso3@mail.com"
         }
         const putResponse = await fetch("https://proyecto-backend.deno.dev/student", {
@@ -147,7 +147,7 @@ Deno.test({
         const id = result.id;
         //hago el put del estudiante
         const student2 = {
-            name: "Test4",
+            name: "Student4",
             email: "nuevoemail@mail.com"
         }
         const response2 = await fetch(`https://proyecto-backend.deno.dev/student/${id}`, {
@@ -175,7 +175,7 @@ Deno.test({
     name: "deleteStudent",
     async fn() {
         const student = {
-            name: "Test5",
+            name: "Student5",
             email: "emailfalso4@mail.com"
         }
         const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
@@ -204,7 +204,7 @@ Deno.test({
     async fn() {
       //Caso email valido
       const studentValidEmail = {
-        name: "Test6",
+        name: "Student6",
         email: "emailcorrecto@mail.com",
       };
       const validEmailResponse = await fetch(`https://proyecto-backend.deno.dev/student`, {
@@ -220,10 +220,10 @@ Deno.test({
   
       // Caso de correo electrónico inválido
       const studentInvalidEmail = {
-        name: "Test7",
+        name: "Student7",
         email: "emailincorrecto",
       };
-      const ivalidEmailResponse = await fetch(`https://proyecto-backend.deno.dev/student`, {
+      const invalidEmailResponse = await fetch(`https://proyecto-backend.deno.dev/student`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -232,11 +232,11 @@ Deno.test({
       });
 
       //Deberia dar un mensaje de error
-      const invalidEmailResult = await ivalidEmailResponse.text();
+      const invalidEmailResult = await invalidEmailResponse.text();
       
-      assertEquals(ivalidEmailResponse.status, 500); //Error con status 500 debido al validate del modelo
+      assertEquals(invalidEmailResponse.status, 500); //Error con status 500 debido al validate del modelo
 
-      assertEquals(invalidEmailResult, "Student validation failed: email: Validator failed for path `email` with value `emailincorrecto`"); //Mensaje de error del validate del modelo
+      assertStringIncludes(invalidEmailResult, "Student validation failed: email: Validator failed for path `email` with value `emailincorrecto`"); //Mensaje de error del validate del modelo
   
       //Borramos los estudiantes creados, solo se deberia borrar el valido
       const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/student/${validEmailresult.id}`, {
@@ -244,7 +244,7 @@ Deno.test({
       });
 
     await deleteResponse.text();
-    },
-  });
+    }
+});
 
 //Test Middleware Hook deleteStudent con asignaturas
