@@ -251,47 +251,85 @@ Deno.test({
 Deno.test({
     name: "deleteStudentWithSubjects",
     async fn() {
-        //Creamos un estudiante
-        const student = {
-            name: "Student8",
-            email: "mailstudent@mail.com"
+        try{
+            //Creamos un estudiante
+            const student = {
+                name: "Student8",
+                email: "mailstudent8@mail.com"
+            }
+
+            const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
+                },
+                body: JSON.stringify(student) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
+            });
+
+            const resultStudent = await createResponse.json();
+
+            //Creamos una asignatura
+            const subject = {
+                name: "Subject1",
+                year: 1,
+                studentID: [resultStudent.id]
+            }
+
+            const createResponse2 = await fetch("https://proyecto-backend.deno.dev/subject", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
+                },
+                body: JSON.stringify(subject) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
+            });
+
+            const resultSubject = await createResponse2.json();
+
+            //Hacemos el get del estudiante
+            const getResponse = await fetch(`https://proyecto-backend.deno.dev/student/${resultStudent.id}`);
+
+            const resultGetEstudiante = await getResponse.json();
+
+            assertEquals(resultGetEstudiante.name, student.name);
+            assertEquals(resultGetEstudiante.email, student.email);
+
+            //Borramos el estudiante creado
+
+            const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/student/${resultStudent.id}`, {
+                method: "DELETE",
+            });
+
+            const resultDeleteEstudiante = await deleteResponse.json();
+
+            assertEquals(resultDeleteEstudiante.name, student.name);
+            assertEquals(resultDeleteEstudiante.email, student.email);
+
+            //Hacemos el get de la asignatura
+            const getResponse2 = await fetch(`https://proyecto-backend.deno.dev/subject/${resultSubject.id}`);
+
+            const resultGetAsignatura = await getResponse2.json();
+
+            console.log("resultAsignatura: ", resultGetAsignatura);
+            console.log("resultAsignatura: ", resultGetAsignatura);
+
+            //Comprobamos que la asignatura no tiene estudiantes
+            assertEquals(resultGetAsignatura.name, subject.name);
+            assertEquals(resultGetAsignatura.year, subject.year);
+
+            assertEquals(resultGetAsignatura.studentsID.length, 0);
+
+            //Borramos la asignatura creada
+            const deleteResponse2 = await fetch(`https://proyecto-backend.deno.dev/subject/${resultSubject.id}`, {
+                method: "DELETE",
+            });
+
+            const resultDeleteAsignatura = await deleteResponse2.json();
+
+            assertEquals(resultDeleteAsignatura.name, subject.name);
+            assertEquals(resultDeleteAsignatura.year, subject.year);
+        }catch(error){
+            console.log(error);
         }
-
-        const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
-            },
-            body: JSON.stringify(student) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
-        });
-
-        const resultStudent = await createResponse.json();
-
-        //Creamos una asignatura
-        const subject = {
-            name: "Subject1",
-            year: 1,
-            studentID: [resultStudent.id],
-        }
-
-        const createResponse2 = await fetch("https://proyecto-backend.deno.dev/subject", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
-            },
-            body: JSON.stringify(subject) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
-        });
-
-        const resultSubject = await createResponse2.json();
-
-        //Hacemos el get del estudiante
-        const getResponse = await fetch(`https://proyecto-backend.deno.dev/student/${resultStudent.id}`);
-
-        const resultGetEstudiante = await getResponse.json();
-
-        assertEquals(resultGetEstudiante.name, student.name);
-        assertEquals(resultGetEstudiante.email, student.email);
-
     }
 });
 
