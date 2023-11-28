@@ -1,5 +1,5 @@
 // @deno-types="npm:@types/express@4" // Necesario para que deno pueda usar express
-import express, { Request, Response } from "express"; //Podemos importar debido al json y a los settings de deno import map => ./deno.json
+import express from "express"; //Podemos importar debido al json y a los settings de deno import map => ./deno.json
 import mongoose from "mongoose";
 
 //En deno.json --env hace que se pueda usar las variables de entorno directamente en el codigo
