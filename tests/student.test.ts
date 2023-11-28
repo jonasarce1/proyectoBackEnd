@@ -248,3 +248,50 @@ Deno.test({
 });
 
 //Test Middleware Hook deleteStudent con asignaturas
+Deno.test({
+    name: "deleteStudentWithSubjects",
+    async fn() {
+        //Creamos un estudiante
+        const student = {
+            name: "Student8",
+            email: "mailstudent@mail.com"
+        }
+
+        const createResponse = await fetch("https://proyecto-backend.deno.dev/student", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
+            },
+            body: JSON.stringify(student) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
+        });
+
+        const resultStudent = await createResponse.json();
+
+        //Creamos una asignatura
+        const subject = {
+            name: "Subject1",
+            year: 1,
+            studentID: [resultStudent.id],
+        }
+
+        const createResponse2 = await fetch("https://proyecto-backend.deno.dev/subject", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json" //Esto es necesario para que el servidor sepa que el cuerpo de la peticion es un JSON
+            },
+            body: JSON.stringify(subject) //Convierte el objeto a un string (tipo raw JSON para que lo entienda el servidor)
+        });
+
+        const resultSubject = await createResponse2.json();
+
+        //Hacemos el get del estudiante
+        const getResponse = await fetch(`https://proyecto-backend.deno.dev/student/${resultStudent.id}`);
+
+        const resultGetEstudiante = await getResponse.json();
+
+        assertEquals(resultGetEstudiante.name, student.name);
+        assertEquals(resultGetEstudiante.email, student.email);
+
+    }
+});
+

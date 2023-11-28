@@ -9,25 +9,25 @@ const subjectSchema = new Schema(
   {
     name: { type: String, required: true },
     year: { type: Number, required: true },
-    teacherID: { type: Schema.Types.ObjectId, required: true, ref: "Teacher" }, //ref es para decirle a mongoose que es una referencia a otro modelo
-    studentsID: [
-      { type: Schema.Types.ObjectId, required: true, ref: "Student" }, //Schema.types.ObjectId es de mongoose y mongoose.types.ObjectId es de typescript, aqui mejor usar el de Schema
+    teacherID: { type: Schema.Types.ObjectId, required: false, ref: "Teacher" }, //ref es para decirle a mongoose que es una referencia a otro modelo
+    studentsID: [ //Puedes tener una asignatura sin estudiantes ni profesor
+      { type: Schema.Types.ObjectId, required: false, ref: "Student" }, //Schema.types.ObjectId es de mongoose y mongoose.types.ObjectId es de typescript, aqui mejor usar el de Schema
     ],
   },
   { timestamps: true } //timestamps es para que mongoose cree createdAt y updatedAt
 );
 
 // validate year
-subjectSchema.path("year").validate((year: number) => { //No permito que nadie introduzca en la BBDD un año que no sea 1, 2, 3 o 4 si alguien lo intenta mongoose no lo permitira
-  if(year < 1 || year > 4) return false;
-  return true;
-})
+subjectSchema.path("year").validate((year: number) => { //El anyo tiene que ser entre 1 y 4
+  return year >= 1 && year <= 4;
+}, "Year must be between 1 and 4");
 
 // validate studentsID
 subjectSchema
   .path("studentsID")
   .validate(async function (studentIDs: mongoose.Types.ObjectId[]) {
     try {
+      if(studentIDs.length === 0) return true; //Si no hay estudiantes mongoose lo permite (porque puede haber una asignatura sin estudiantes
       if (studentIDs.some((id) => !mongoose.isValidObjectId(id))) return false; //Si alguno de los id no es valido mongoose no lo permite
       const students = await StudentModel.find({ _id: { $in: studentIDs } }).exec(); //Si todos los id son validos mongoose busca los estudiantes en la BBDD, $in es para buscar en un array
       return students.length === studentIDs.length; //Si el numero de estudiantes encontrados es igual al numero de id introducidos mongoose lo permite
@@ -41,6 +41,7 @@ subjectSchema
   .path("teacherID")
   .validate(async function (teacherID: mongoose.Types.ObjectId) { //Valido que el id del profesor exista en la BBDD
     try {
+      if(!teacherID) return true; //Si no hay profesor mongoose lo permite (porque puede haber una asignatura sin profesor)
       if (!mongoose.isValidObjectId(teacherID)) return false; //Si el id no es valido mongoose no lo permite
       const teacher = await TeacherModel.findById(teacherID).exec(); 
       if (!teacher) return false; //Si el profesor no existe en la BBDD mongoose no lo permite
