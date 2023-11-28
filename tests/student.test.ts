@@ -247,7 +247,7 @@ Deno.test({
     }
 });
 
-//Test Middleware Hook deleteStudent con asignaturas
+//Test Middleware Hook delete Student con asignaturas
 Deno.test({
     name: "deleteStudentWithSubjects",
     async fn() {
@@ -309,14 +309,11 @@ Deno.test({
 
             const resultGetAsignatura = await getResponse2.json();
 
-            console.log("resultAsignatura: ", resultGetAsignatura);
-            console.log("resultAsignatura: ", resultGetAsignatura);
-
             //Comprobamos que la asignatura no tiene estudiantes
             assertEquals(resultGetAsignatura.name, subject.name);
             assertEquals(resultGetAsignatura.year, subject.year);
 
-            assertEquals(resultGetAsignatura.studentsID.length, 0);
+            assertEquals(resultGetAsignatura.students.length, 0);
 
             //Borramos la asignatura creada
             const deleteResponse2 = await fetch(`https://proyecto-backend.deno.dev/subject/${resultSubject.id}`, {

@@ -1,4 +1,4 @@
-import { assertEquals, assertStringIncludes } from "https://deno.land/std@0.203.0/assert/mod.ts";
+import { assertEquals} from "https://deno.land/std@0.203.0/assert/mod.ts";
 import { Subject } from "../types.ts";
 
 //Funcion auxiliar para crear una asignatura de prueba

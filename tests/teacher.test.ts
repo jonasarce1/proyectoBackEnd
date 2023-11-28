@@ -256,3 +256,71 @@ Deno.test({
     await deleteResponse.text();
     }
 });
+
+//Test Middleware Hook delete Teacher con asignaturas
+Deno.test({
+    name: "deleteTeacherWithSubjects",
+    async fn() {
+        //Creamos un profesor
+        const teacher = {
+            name: "Teacher8",
+            email: "mailteacher8@mail.com"
+        }
+
+        //Lo guardamos en la base de datos
+        const createResponse = await fetch("https://proyecto-backend.deno.dev/teacher", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(teacher)
+        });
+
+        const result = await createResponse.json();
+
+        //Creamos una asignatura
+        const subject = {
+            name: "Subject1",
+            year: 1,
+            teacherID: result.id,
+            studentsID: []
+        }
+
+        //La guardamos en la base de datos
+        const createResponseSubject = await fetch("https://proyecto-backend.deno.dev/subject", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(subject)
+        });
+
+        const resultSubject = await createResponseSubject.json();
+
+        //Borramos el profesor creado
+        const deleteResponse = await fetch(`https://proyecto-backend.deno.dev/teacher/${result.id}`, {
+            method: "DELETE",
+        });
+
+        const deleteResult = await deleteResponse.json();
+
+        //Comprobamos que el profesor borrado es el mismo que el creado
+        assertEquals(deleteResult.name, teacher.name);
+
+        //Comprobamos que el profesor asociado a la asignatura no esta
+        const getResponseSubject = await fetch(`https://proyecto-backend.deno.dev/subject/${resultSubject.id}`);
+
+        const getResultSubject = await getResponseSubject.json();
+
+        assertEquals(getResultSubject.teacher.id, "");
+        assertEquals(getResultSubject.teacher.name, "");
+        assertEquals(getResultSubject.teacher.email, "");
+
+        //Borramos la asignatura creada
+        const deleteResponseSubject = await fetch(`https://proyecto-backend.deno.dev/subject/${resultSubject.id}`, {
+            method: "DELETE",
+        });
+
+        await deleteResponseSubject.text();
+    }
+});
